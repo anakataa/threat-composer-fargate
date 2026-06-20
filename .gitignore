@@ -1,0 +1,22 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+!example.tfvars
+crash.log
+crash.*.log
+
+# Node / React
+node_modules/
+build/
+.env
+.env.local
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Docker
+*.log

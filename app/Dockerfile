@@ -6,12 +6,18 @@ ARG THREAT_COMPOSER_REF=main
 
 WORKDIR /build
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends rsync && \
+    rm -rf /var/lib/apt/lists/*
+
 # Shallow clone: we only need the latest snapshot, not the full git history.
 RUN git clone --depth 1 --branch ${THREAT_COMPOSER_REF} \
     https://github.com/awslabs/threat-composer.git .
 
-# pdk and yarn are required to install/build this monorepo (per upstream docs)
-RUN npm install -g @aws/pdk yarn
+RUN npm install -g @aws/pdk
+#thats its solution for install< install uv binary to /usr/local/bin/uv for alpine linux    
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    mv /root/.local/bin/uv /usr/local/bin/uv
 
 RUN pdk install --frozen-lockfile
 
@@ -30,8 +36,8 @@ RUN addgroup -g 1001 appgroup && \
 RUN rm -f /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Pull only the compiled static site from the build stage
-COPY --from=builder /build/packages/threat-composer-app/build /usr/share/nginx/html
+
+COPY --from=builder /build/packages/threat-composer-app/build/website /usr/share/nginx/html
 
 # nginx normally needs root to bind to its default paths and port 80.
 # Since we run as non-root, hand ownership of the directories nginx writes
